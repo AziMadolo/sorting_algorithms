@@ -1,61 +1,50 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <stddef.h>
 #include "sort.h"
 
 /**
- * create_listint - Creates a doubly linked list from an array of integers
- *
- * @array: Array to convert to a doubly linked list
- * @size: Size of the array
- *
- * Return: Pointer to the first element of the created list. NULL on failure
+ * swap_nodes - Swap two nodes in a listint_t doubly-linked list.
+ * @h: A pointer to the head of the doubly-linked list.
+ * @n1: A pointer to the first node to swap.
+ * @n2: The second node to swap.
  */
-listint_t *create_listint(const int *array, size_t size)
+void swap_nodes(listint_t **h, listint_t **n1, listint_t *n2)
 {
-    listint_t *list;
-    listint_t *node;
-    int *tmp;
-
-    list = NULL;
-    while (size--)
-    {
-        node = malloc(sizeof(*node));
-        if (!node)
-            return (NULL);
-        tmp = (int *)&node->n;
-        *tmp = array[size];
-        node->next = list;
-        node->prev = NULL;
-        list = node;
-        if (list->next)
-            list->next->prev = list;
-    }
-    return (list);
+    (*n1)->next = n2->next;
+    if (n2->next != NULL)
+        n2->next->prev = *n1;
+    n2->prev = (*n1)->prev;
+    n2->next = *n1;
+    if ((*n1)->prev != NULL)
+        (*n1)->prev->next = n2;
+    else
+        *h = n2;
+    (*n1)->prev = n2;
+    *n1 = n2->prev;
 }
 
 /**
- * main - Entry point
+ * insertion_sort_list - Sorts a doubly linked list of integers
+ *                       using the insertion sort algorithm.
+ * @list: A pointer to the head of a doubly-linked list of integers.
  *
- * Return: Always 0
+ * Description: Prints the list after each swap.
  */
-int main(void)
+void insertion_sort_list(listint_t **list)
 {
-    listint_t *list;
-    int array[] = {19, 48, 99, 71, 13, 52, 96, 73, 86, 7};
-    size_t n = sizeof(array) / sizeof(array[0]);
+    listint_t *iter, *insert, *tmp;
 
-    list = create_listint(array, n);
-    if (!list)
-        return (1);
+    if (list == NULL || *list == NULL || (*list)->next == NULL)
+        return;
 
-    printf("Original array:\n");
-    print_list(list);
-    printf("\n");
-
-    insertion_sort_list(&list);
-
-    printf("\nSorted array:\n");
-    print_list(list);
-
-    return (0);
+    for (iter = (*list)->next; iter != NULL; iter = tmp)
+    {
+        tmp = iter->next;
+        insert = iter->prev;
+        while (insert != NULL && iter->n < insert->n)
+        {
+            swap_nodes(list, &insert, iter);
+            print_list(*list);
+        }
+    }
 }
+
